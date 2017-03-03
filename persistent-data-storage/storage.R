@@ -5,7 +5,7 @@ library(RMySQL)
 library(RSQLite)
 library(mongolite)
 library(googlesheets)
-library(RAmazonS3)
+#library(RAmazonS3)
 library(rdrop2)
 
 DB_NAME <- "shinyapps"
@@ -198,34 +198,3 @@ load_data_dropbox <- function() {
 }
 
 
-
-
-#### Method 7: Amazon S3 ####
-
-s3_bucket_name <- TABLE_NAME %>% gsub("_", "-", .)
-
-save_data_s3 <- function(data) {
-  file_name <- paste0(
-    paste(
-      get_time_human(),
-      digest(data, algo = "md5"),
-      sep = "_"
-    ),
-    ".csv"
-  )
-  RAmazonS3::addFile(I(paste0(paste(names(data), collapse = ","),
-                              "\n",
-                              paste(data, collapse = ","))),
-                     s3_bucket_name, file_name, virtual = TRUE)
-}
-load_data_s3 <- function() {
-  files <- listBucket(s3_bucket_name)$Key %>% as.character
-  data <-
-    lapply(files, function(x) {
-      raw <- getFile(s3_bucket_name, x, virtual = TRUE)
-      read.csv(text = raw, stringsAsFactors = FALSE)
-    }) %>%
-    do.call(rbind, .)
-
-  data
-}
