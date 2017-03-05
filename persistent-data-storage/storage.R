@@ -9,7 +9,7 @@ library(googlesheets)
 library(rdrop2)
 
 DB_NAME <- "shinyapps"
-TABLE_NAME <- "google_form_mock"
+TABLE_NAME <- "responses"
 
 # decide which function to use to save based on storage type
 get_save_fxn <- function(type) {
@@ -75,7 +75,7 @@ load_data_flatfile <- function() {
 #### Method 2: SQLite ####
 
 save_data_sqlite <- function(data) {
-  db <- dbConnect(SQLite(), options()$sqlite$file)
+  db <- dbConnect(SQLite(), "/srv/shiny-server/persistent-data-storage/shinydb.sqlite")
   query <-
     sprintf("INSERT INTO %s (%s) VALUES ('%s')",
             TABLE_NAME,
@@ -86,7 +86,7 @@ save_data_sqlite <- function(data) {
   dbDisconnect(db)
 }
 load_data_sqlite <- function() {
-  db <- dbConnect(SQLite(), options()$sqlite$file)
+  db <- dbConnect(SQLite(), "/srv/shiny-server/persistent-data-storage/shinydb.sqlite")
   query <- sprintf("SELECT * FROM %s", TABLE_NAME)
   data <- dbGetQuery(db, query)
   dbDisconnect(db)
